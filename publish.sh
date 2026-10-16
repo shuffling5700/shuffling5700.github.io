@@ -30,7 +30,8 @@ cd "$SITE"
 git add -A
 if git diff --cached --quiet; then
   echo "Nothing changed."
-  exit 0
+else
+  git commit -q -m "Update games from games_wiki $(git -C "$SRC" rev-parse --short HEAD)"
 fi
-git commit -q -m "Update games from games_wiki $(git -C "$SRC" rev-parse --short HEAD)"
+# Push even when nothing changed, so an earlier --no-push commit goes out too.
 [ "${1:-}" = "--no-push" ] || git push -u origin main
