@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory Match</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2d44;
+      --back: #3d5a80;
+      --front: #e0fbfc;
+      --match: #98c1d9;
+      --btn: #ee6c4d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      text-align: center;
+      padding: 24px 16px 40px;
+    }
+    h1 { font-size: 1.8rem; margin: 0 0 8px; }
+    p { font-size: 1.15rem; margin: 0 0 16px; }
+    #status { font-weight: 600; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      gap: 12px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      padding: 0;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      background: var(--back);
+      color: transparent;
+      font: 700 1.1rem/1 "Avenir Next", "Segoe UI", sans-serif;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+    .card.open,
+    .card.matched {
+      color: var(--ink);
+      background: var(--front);
+    }
+    .card.matched { background: var(--match); cursor: default; }
+    .card:disabled { cursor: default; }
+    #again {
+      display: none;
+      margin-top: 8px;
+      padding: 12px 28px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--btn);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #again.show { display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>Memory Match</h1>
+  <p>Click two cards. Find the pairs.</p>
+  <p id="status">Pairs left: 6 · Moves: 0</p>
+  <div class="grid" id="grid"></div>
+  <button type="button" id="again">Play again</button>
+  <script>
+    const FACES = ["CAT", "DOG", "SUN", "BUS", "STAR", "FISH"];
+    const FLIP_BACK_MS = 800;
+    const grid = document.getElementById("grid");
+    const status = document.getElementById("status");
+    const again = document.getElementById("again");
+
+    let deck = [];
+    let open = [];
+    let locks = 0;
+    let moves = 0;
+    let left = FACES.length;
+
+    function shuffle(items) {
+      const a = items.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+      }
+      return a;
+    }
+
+    function renderStatus() {
+      if (left === 0) {
+        status.textContent = "You found them all in " + moves + " moves.";
+        again.classList.add("show");
+        return;
+      }
+      status.textContent = "Pairs left: " + left + " · Moves: " + moves;
+    }
+
+    function makeCard(face, index) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "card";
+      btn.dataset.face = face;
+      btn.dataset.index = String(index);
+      btn.setAttribute("aria-label", "Hidden card");
+      btn.addEventListener("click", onCard);
+      return btn;
+    }
+
+    function deal() {
+      grid.replaceChildren();
+      open = [];
+      locks = 0;
+      moves = 0;
+      left = FACES.length;
+      again.classList.remove("show");
+      deck = shuffle(FACES.concat(FACES));
+      deck.forEach(function (face, i) {
+        grid.appendChild(makeCard(face, i));
+      });
+      renderStatus();
+    }
+
+    function onCard(ev) {
+      const btn = ev.currentTarget;
+      if (locks || btn.classList.contains("open") || btn.classList.contains("matched")) {
+        return;
+      }
+      btn.classList.add("open");
+      btn.textContent = btn.dataset.face;
+      btn.setAttribute("aria-label", btn.dataset.face);
+      open.push(btn);
+      if (open.length < 2) return;
+
+      moves += 1;
+      const a = open[0];
+      const b = open[1];
+      open = [];
+      if (a.dataset.face === b.dataset.face) {
+        a.classList.add("matched");
+        b.classList.add("matched");
+        left -= 1;
+        renderStatus();
+        return;
+      }
+      locks = 1;
+      window.setTimeout(function () {
+        a.classList.remove("open");
+        b.classList.remove("open");
+        a.textContent = "";
+        b.textContent = "";
+        a.setAttribute("aria-label", "Hidden card");
+        b.setAttribute("aria-label", "Hidden card");
+        locks = 0;
+        renderStatus();
+      }, FLIP_BACK_MS);
+    }
+
+    again.addEventListener("click", deal);
+    deal();
+  </script>
+</body>
+</html>
