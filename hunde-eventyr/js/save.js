@@ -195,6 +195,32 @@
     input.click();
   };
 
+  // Family saves: on the website, publish.sh bundles exported saves into
+  // family-saves.json. Each one becomes a new slot once; `origin` (id@played)
+  // stops the same version being added twice. fetch fails on file://.
+  // done(n) gets the number added, or -1 if the file could not be fetched.
+  HE.importFamilySaves = function (done) {
+    fetch("family-saves.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((list) => {
+        const have = new Set(HE.slots().map((s) => s.origin));
+        let added = 0;
+        for (const raw of list) {
+          const origin = raw.id + "@" + raw.played;
+          if (have.has(origin)) continue;
+          const s = upgrade(raw);
+          if (!s) continue;
+          s.id = newId();
+          s.origin = origin;
+          write(s);
+          have.add(origin);
+          added += 1;
+        }
+        done(added);
+      })
+      .catch(() => done(-1));
+  };
+
   // The active pet (or `id`): its save record, level and given name.
   // ?level=N is a preview override for art checks.
   HE.petId = () => HE.save.activePet;

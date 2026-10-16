@@ -1,13 +1,14 @@
 // Title screen. "Hvem spiller?" lists every saved game (one slot each);
-// Nyt spil asks hero then age and always makes a new slot; Hent gemt spil
-// fra fil imports into a new slot. Nothing here can overwrite a game.
+// Nyt spil asks hero then age and always makes a new slot; Hent familiens
+// gemte spil and Hent gemt spil fra fil import into new slots. Nothing here
+// can overwrite a game.
 (function () {
   const HE = window.HE;
   const S = HE.strings;
   const D = HE.data;
   const W = 256;
   const H = 224;
-  const VIS = 4; // slot rows shown at once
+  const VIS = 3; // slot rows shown at once (more would run into the hero preview)
   const HERO_IDS = Object.keys(D.HEROES);
 
   const st = { phase: "menu", slots: [], sel: 0, scroll: 0, hero: 0, age: 0, msg: "", msgTimer: 0, frames: 0 };
@@ -21,9 +22,10 @@
     st.slots = HE.slots();
   }
 
-  // Menu indices: 0..n-1 the slots, n = Nyt spil, n+1 = Hent fra fil.
+  // Menu indices: 0..n-1 the slots, n = Nyt spil, n+1 = Hent familiens
+  // gemte spil, n+2 = Hent fra fil.
   function menuLength() {
-    return st.slots.length + 2;
+    return st.slots.length + 3;
   }
 
   function choose() {
@@ -37,6 +39,16 @@
       st.hero = 0;
       st.age = 0;
       return;
+    }
+    if (st.sel === n + 1) {
+      return HE.importFamilySaves((added) => {
+        say(added < 0 ? S.title.familyFail : added ? S.title.familyLoaded(added) : S.title.familyNone);
+        if (added > 0) {
+          refresh();
+          st.sel = 0;
+          st.scroll = 0;
+        }
+      });
     }
     HE.importSaveFile((ok) => {
       say(ok ? S.title.loaded : S.title.loadFail);
@@ -99,7 +111,7 @@
       const pet = s.pets[s.activePet];
       return { label: S.title.slot(hero.name, s.profile.age, S.petNames[s.activePet], pet.level, s.gold) };
     });
-    items.push({ label: S.title.newGame }, { label: S.title.load });
+    items.push({ label: S.title.newGame }, { label: S.title.family }, { label: S.title.load });
     const drawSel = st.sel < n ? st.sel - st.scroll : shown.length + (st.sel - n);
     HE.drawMenu(ctx, items, drawSel, 30, 50);
     if (st.scroll > 0) HE.text(ctx, "▲", W - 12, 50, { size: 8, color: "#90a4ae" });
