@@ -1,5 +1,32 @@
 [{
   "version": 3,
+  "gold": 4,
+  "inventory": { "burger": 0, "kage": 0, "aeble": 0, "banan": 0, "pizza": 0 },
+  "games": 21,
+  "id": "mubl9pwae940",
+  "played": "2026-10-16T06:49:40.630Z",
+  "created": "2026-09-09T09:06:31.031Z",
+  "profile": { "hero": "freja", "age": 10 },
+  "stats": {
+    "3": { "correct": 146, "wrong": 12 },
+    "4": { "correct": 153, "wrong": 6 },
+    "5": { "correct": 107, "wrong": 3 },
+    "6": { "correct": 126, "wrong": 17 },
+    "7": { "correct": 101, "wrong": 16 },
+    "8": { "correct": 41, "wrong": 2 },
+    "9": { "correct": 17, "wrong": 6 }
+  },
+  "pets": {
+    "bandit": { "level": 10, "np": 12, "wearing": [] },
+    "kat": { "level": 7, "np": 43, "wearing": [] }
+  },
+  "activePet": "kat",
+  "wardrobe": ["bandana"],
+  "races": { "won": 4, "lost": 9 },
+  "records": { "4": 19.4, "7": 40.9, "8": 42.6 }
+}
+,{
+  "version": 3,
   "id": "mubl9txakljz",
   "created": "2026-09-09T16:03:46.808Z",
   "played": "2026-10-16T06:38:15.388Z",
